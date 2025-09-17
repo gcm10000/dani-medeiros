@@ -1,103 +1,169 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React from 'react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { ArrowRight, Star, Heart, Award } from 'lucide-react';
+import heroBakery from '@/assets/hero-bakery.jpg';
+import chocolateCake from '@/assets/chocolate-cake.jpg';
+import cupcakes from '@/assets/cupcakes.jpg';
+import brigadeiros from '@/assets/brigadeiros.jpg';
+import { HeroButtons } from '@/components/HeroButtons';
+
+const Home = () => {
+  const features = [
+    {
+      icon: <Award className="h-8 w-8 text-primary" />,
+      title: "Receitas Artesanais",
+      description: "Cada receita é desenvolvida com ingredientes selecionados e técnicas tradicionais."
+    },
+    {
+      icon: <Heart className="h-8 w-8 text-primary" />,
+      title: "Feito com Carinho",
+      description: "Todo produto é preparado com amor e atenção aos mínimos detalhes."
+    },
+    {
+      icon: <Star className="h-8 w-8 text-primary" />,
+      title: "Qualidade Premium",
+      description: "Utilizamos apenas ingredientes de primeira qualidade para garantir o melhor sabor."
+    }
+  ];
+
+  const highlights = [
+    { image: '/assets/chocolate-cake.jpg', title: 'Bolos Especiais', description: '...' },
+    { image: '/assets/cupcakes.jpg', title: 'Cupcakes Artesanais', description: '...' },
+    { image: '/assets/brigadeiros.jpg', title: 'Doces Gourmet', description: '...' },
+  ];
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(/assets/hero-bakery.jpg)` }}
+        >
+          <div className="absolute inset-0 bg-black/40" />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        
+        <div className="relative z-10 text-center text-white px-4 max-w-4xl">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 font-dancing">
+            Dani Medeiros
+          </h1>
+          <h2 className="text-2xl md:text-3xl mb-8 font-light">
+            Bolos e Doces Artesanais
+          </h2>
+          <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
+            Criando momentos doces e memoráveis com receitas artesanais 
+            e ingredientes selecionados. Cada doce é feito com carinho especial para você.
+          </p>
+          <HeroButtons />
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-gradient-soft">
+        <div className="container px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-foreground mb-4 font-dancing">
+              Por que escolher nossos doces?
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Combinamos tradição, qualidade e inovação para criar experiências únicas
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {features.map((feature, index) => (
+              <Card key={index} className="text-center shadow-card hover:shadow-elegant transition-smooth border-primary/10">
+                <CardContent className="pt-8 pb-6">
+                  <div className="flex justify-center mb-4 float-animation" style={{ animationDelay: `${index * 0.2}s` }}>
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3 text-foreground">
+                    {feature.title}
+                  </h3>
+                  <p className="text-muted-foreground">
+                    {feature.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Highlights Section */}
+      <section className="py-20">
+        <div className="container px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-foreground mb-4 font-dancing">
+              Nossos Destaques
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Conheça alguns dos nossos produtos mais especiais
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {highlights.map((highlight, index) => (
+              <Card key={index} className="group overflow-hidden shadow-card hover:shadow-elegant transition-smooth">
+                <div className="aspect-square overflow-hidden">
+                  <img 
+                    src={highlight.image} 
+                    alt={highlight.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
+                  />
+                </div>
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-semibold mb-2 text-foreground">
+                    {highlight.title}
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    {highlight.description}
+                  </p>
+                  <Link href="/cardapio">
+                    <Button variant="elegant" className="w-full">
+                      Ver Mais
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 gradient-primary text-white">
+        <div className="container px-4 text-center">
+          <h2 className="text-4xl font-bold mb-6 font-dancing">
+            Pronto para adoçar seu dia?
+          </h2>
+          <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+            Faça seu pedido agora e desfrute dos melhores doces artesanais da região. 
+            Entregamos com todo carinho na sua casa!
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/cardapio">
+              <Button size="lg" variant="hero-outline" className="text-lg px-8 py-6">
+                Ver Cardápio Completo
+              </Button>
+            </Link>
+            <Button 
+              size="lg" 
+              variant="whatsapp"
+              className="text-lg px-8 py-6"
+              onClick={() => window.open('https://wa.me/5521959051443?text=Olá! Gostaria de fazer um pedido personalizado.', '_blank')}
+            >
+              Pedido Personalizado
+            </Button>
+          </div>
+        </div>
+      </section>
     </div>
   );
-}
+};
+
+export default Home;
