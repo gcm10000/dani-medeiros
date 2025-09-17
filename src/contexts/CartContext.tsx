@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
-import { CartItem, Product, CartContextType } from '@/types/cart';
+"use client";
+
+import React, { createContext, useContext, useReducer, ReactNode, useEffect, useState } from "react";
+import { CartItem, Product, CartContextType } from "@/types/cart";
 
 type CartAction =
-  | { type: 'ADD_ITEM'; product: Product }
-  | { type: 'REMOVE_ITEM'; productId: string }
-  | { type: 'UPDATE_QUANTITY'; productId: string; quantity: number }
-  | { type: 'CLEAR_CART' };
+  | { type: "ADD_ITEM"; product: Product }
+  | { type: "REMOVE_ITEM"; productId: string }
+  | { type: "UPDATE_QUANTITY"; productId: string; quantity: number }
+  | { type: "CLEAR_CART" };
 
 interface CartState {
   items: CartItem[];
@@ -13,42 +15,37 @@ interface CartState {
 
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
-    case 'ADD_ITEM':
-      const existingItemIndex = state.items.findIndex(
-        item => item.product.id === action.product.id
+    case "ADD_ITEM":
+      const existingIndex = state.items.findIndex(
+        (item) => item.product.id === action.product.id
       );
-      
-      if (existingItemIndex >= 0) {
+
+      if (existingIndex >= 0) {
         const updatedItems = [...state.items];
-        updatedItems[existingItemIndex].quantity += 1;
+        updatedItems[existingIndex].quantity += 1;
         return { items: updatedItems };
       }
-      
+
+      return { items: [...state.items, { product: action.product, quantity: 1 }] };
+
+    case "REMOVE_ITEM":
       return {
-        items: [...state.items, { product: action.product, quantity: 1 }]
+        items: state.items.filter((item) => item.product.id !== action.productId),
       };
 
-    case 'REMOVE_ITEM':
-      return {
-        items: state.items.filter(item => item.product.id !== action.productId)
-      };
-
-    case 'UPDATE_QUANTITY':
+    case "UPDATE_QUANTITY":
       if (action.quantity <= 0) {
         return {
-          items: state.items.filter(item => item.product.id !== action.productId)
+          items: state.items.filter((item) => item.product.id !== action.productId),
         };
       }
-      
       return {
-        items: state.items.map(item =>
-          item.product.id === action.productId
-            ? { ...item, quantity: action.quantity }
-            : item
-        )
+        items: state.items.map((item) =>
+          item.product.id === action.productId ? { ...item, quantity: action.quantity } : item
+        ),
       };
 
-    case 'CLEAR_CART':
+    case "CLEAR_CART":
       return { items: [] };
 
     default:
@@ -62,59 +59,48 @@ interface CartProviderProps {
   children: ReactNode;
 }
 
-const CART_STORAGE_KEY = 'bakery-cart';
-
-const loadCartFromStorage = (): CartState => {
-  try {
-    const storedCart = localStorage.getItem(CART_STORAGE_KEY);
-    if (storedCart) {
-      return JSON.parse(storedCart);
-    }
-  } catch (error) {
-    console.error('Erro ao carregar carrinho do localStorage:', error);
-  }
-  return { items: [] };
-};
-
-const saveCartToStorage = (state: CartState) => {
-  try {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state));
-  } catch (error) {
-    console.error('Erro ao salvar carrinho no localStorage:', error);
-  }
-};
+const CART_STORAGE_KEY = "bakery-cart";
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
-  const [state, dispatch] = useReducer(cartReducer, loadCartFromStorage());
+  const [state, dispatch] = useReducer(cartReducer, { items: [] }, () => {
+    // lazy initializer seguro para SSR
+    if (typeof window !== "undefined") {
+      try {
+        const storedCart = localStorage.getItem(CART_STORAGE_KEY);
+        if (storedCart) return JSON.parse(storedCart);
+      } catch (error) {
+        console.error("Erro ao carregar carrinho do localStorage:", error);
+      }
+    }
+    return { items: [] };
+  });
 
-  // Salva o carrinho no localStorage sempre que o estado muda
+  const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
-    saveCartToStorage(state);
+    setHydrated(true);
+  }, []);
+
+  // salva sempre que o estado muda (apenas client-side)
+  useEffect(() => {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state));
+    } catch (error) {
+      console.error("Erro ao salvar carrinho no localStorage:", error);
+    }
   }, [state]);
 
-  const addItem = (product: Product) => {
-    dispatch({ type: 'ADD_ITEM', product });
-  };
+  if (!hydrated) return null; // não renderiza nada até hidratar
 
-  const removeItem = (productId: string) => {
-    dispatch({ type: 'REMOVE_ITEM', productId });
-  };
+  const addItem = (product: Product) => dispatch({ type: "ADD_ITEM", product });
+  const removeItem = (productId: string) => dispatch({ type: "REMOVE_ITEM", productId });
+  const updateQuantity = (productId: string, quantity: number) =>
+    dispatch({ type: "UPDATE_QUANTITY", productId, quantity });
+  const clearCart = () => dispatch({ type: "CLEAR_CART" });
 
-  const updateQuantity = (productId: string, quantity: number) => {
-    dispatch({ type: 'UPDATE_QUANTITY', productId, quantity });
-  };
+  const getTotal = () =>
+    state.items.reduce((total, item) => total + item.product.price * item.quantity, 0);
 
-  const clearCart = () => {
-    dispatch({ type: 'CLEAR_CART' });
-  };
-
-  const getTotal = () => {
-    return state.items.reduce((total, item) => total + (item.product.price * item.quantity), 0);
-  };
-
-  const getItemCount = () => {
-    return state.items.reduce((count, item) => count + item.quantity, 0);
-  };
+  const getItemCount = () => state.items.reduce((count, item) => count + item.quantity, 0);
 
   const value: CartContextType = {
     items: state.items,
@@ -126,17 +112,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     getItemCount,
   };
 
-  return (
-    <CartContext.Provider value={value}>
-      {children}
-    </CartContext.Provider>
-  );
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
+  if (!context) throw new Error("useCart must be used within a CartProvider");
   return context;
 };

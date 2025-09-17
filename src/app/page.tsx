@@ -5,10 +5,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, Star, Heart, Award } from 'lucide-react';
-import heroBakery from '@/assets/hero-bakery.jpg';
-import chocolateCake from '@/assets/chocolate-cake.jpg';
-import cupcakes from '@/assets/cupcakes.jpg';
-import brigadeiros from '@/assets/brigadeiros.jpg';
 import { HeroButtons } from '@/components/HeroButtons';
 
 const Home = () => {
@@ -31,9 +27,9 @@ const Home = () => {
   ];
 
   const highlights = [
-    { image: '/assets/chocolate-cake.jpg', title: 'Bolos Especiais', description: '...' },
-    { image: '/assets/cupcakes.jpg', title: 'Cupcakes Artesanais', description: '...' },
-    { image: '/assets/brigadeiros.jpg', title: 'Doces Gourmet', description: '...' },
+    { image: '/assets/chocolate-cake.jpg', title: 'Bolos Especiais', description: 'Para celebrar seus momentos únicos' },
+    { image: '/assets/cupcakes.jpg', title: 'Cupcakes Artesanais', description: 'Pequenas delícias com grande sabor' },
+    { image: '/assets/brigadeiros.jpg', title: 'Doces Gourmet', description: 'Tradição brasileira com toque especial' },
   ];
 
   return (

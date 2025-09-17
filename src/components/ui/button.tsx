@@ -23,6 +23,8 @@ const buttonVariants = cva(
         hero: "gradient-primary text-white font-medium shadow-card hover:shadow-elegant transition-smooth hover:scale-105",
         elegant: "bg-card text-card-foreground border border-primary/20 hover:border-primary/40 shadow-soft hover:shadow-card transition-smooth",
         whatsapp: "bg-green-500 text-white hover:bg-green-600 shadow-soft transition-smooth hover:scale-105",
+        facebook: "bg-blue-600 text-white hover:bg-blue-700 shadow-soft transition-smooth hover:scale-105",
+        instagram: "bg-gradient-to-tr from-pink-500 to-pink-400 text-white hover:brightness-110 shadow-soft transition-smooth hover:scale-105"
       },
       size: {
         default: "h-10 px-4 py-2",

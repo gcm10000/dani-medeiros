@@ -1,7 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Heart, Instagram, Facebook, MessageCircle } from 'lucide-react';
+import { Heart, Instagram, Facebook, MessageCircle, Link } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { FaWhatsapp, FaFacebook, FaInstagram } from "react-icons/fa";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -34,24 +34,24 @@ const Footer = () => {
             <h4 className="font-semibold text-foreground mb-4">Links Rápidos</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-muted-foreground hover:text-primary transition-smooth">
+                <a href="/" className="text-muted-foreground hover:text-primary transition-smooth">
                   Home
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/cardapio" className="text-muted-foreground hover:text-primary transition-smooth">
+                <a href="/cardapio" className="text-muted-foreground hover:text-primary transition-smooth">
                   Cardápio
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/sobre" className="text-muted-foreground hover:text-primary transition-smooth">
+                <a href="/sobre" className="text-muted-foreground hover:text-primary transition-smooth">
                   Sobre Nós
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/contato" className="text-muted-foreground hover:text-primary transition-smooth">
+                <a href="/contato" className="text-muted-foreground hover:text-primary transition-smooth">
                   Contato
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -60,19 +60,30 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-foreground mb-4">Siga-nos</h4>
             <div className="flex space-x-2 mb-4">
-              <Button variant="ghost" size="icon" className="hover:text-primary">
-                <Instagram className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="hover:text-primary">
-                <Facebook className="h-5 w-5" />
-              </Button>
               <Button 
-                variant="whatsapp" 
-                size="icon"
-                onClick={() => window.open('https://wa.me/5521959051443?text=Olá! Gostaria de fazer um pedido.', '_blank')}
-              >
-                <MessageCircle className="h-5 w-5" />
-              </Button>
+                  variant="instagram" 
+                  size="icon" 
+                >
+                  <FaInstagram className="h-5 w-5" />
+                </Button>
+
+                <Button 
+                  variant="facebook" 
+                  size="icon" 
+                >
+                  <FaFacebook className="h-5 w-5" />
+                </Button>
+
+                <Button 
+                  variant="whatsapp" 
+                  size="icon" 
+                  onClick={() => window.open(
+                    "https://wa.me/5521959051443?text=Olá! Gostaria de fazer um pedido.",
+                    "_blank"
+                  )}
+                >
+                  <FaWhatsapp className="h-5 w-5" />
+                </Button>
             </div>
             <p className="text-sm text-muted-foreground">
               Entre em contato pelo WhatsApp para encomendas personalizadas!

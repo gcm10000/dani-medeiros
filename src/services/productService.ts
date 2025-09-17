@@ -1,6 +1,7 @@
 import { BASE_URL } from '@/config/api';
 import { Product } from '@/types/cart';
 import chocolateCake from '@/assets/chocolate-cake.jpg';
+import { PagedResult } from '@/utils/pagedResult';
 
 interface APIProduct {
   id: number;
@@ -16,6 +17,14 @@ const mapCategoryName = (categoryName: string): 'bolo' | 'cupcake' | 'doce' => {
   if (lowerCategory.includes('cupcake')) return 'cupcake';
   return 'doce';
 };
+
+type GetMenuParams = {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  categoryId?: number;
+};
+
 
 export interface AdminProduct {
   id: number;
@@ -204,15 +213,19 @@ export const productService = {
   },
 
   // Buscar produtos ativos para o cardápio público
-  async getMenuProducts(): Promise<Product[]> {
-    try {
-      const response = await fetch(`${BASE_URL}/api/Products/menu`);
-      if (!response.ok) throw new Error('Erro ao buscar produtos do cardápio');
+  async getMenuProducts(params: GetMenuParams): Promise<PagedResult<Product>> {
+      const query = new URLSearchParams();
+      if (params.page) query.append('page', params.page.toString());
+      if (params.pageSize) query.append('pageSize', params.pageSize.toString());
+      if (params.search) query.append('search', params.search);
+      if (params.categoryId) query.append('categoryId', params.categoryId.toString());
+
+      const url = `${BASE_URL}/api/Products/menu${query.toString() ? `?${query.toString()}` : ''}`;
+      const response = await fetch(url);
+      if (!response.ok) 
+        throw new Error('Erro ao buscar produtos do cardápio');
+      
       return await response.json();
-    } catch (error) {
-      console.error('Erro ao buscar produtos do cardápio:', error);
-      return [];
-    }
   },
   async uploadImage(productId: number | string, file: File): Promise<ProductImage> {
     // const myHeaders = new Headers();

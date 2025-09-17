@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { orderService } from '@/services/orderService';
-import { PAYMENT_STATUS, PaymentStatusType, ORDER_STATUS } from '@/config/api';
-import { toast } from '@/hooks/use-toast';
+"use client";
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { orderService } from "@/services/orderService";
+import { PAYMENT_STATUS } from "@/config/api";
 
 interface OrderContextType {
   currentOrderId: string | null;
@@ -17,7 +18,7 @@ const OrderContext = createContext<OrderContextType | undefined>(undefined);
 export const useOrder = () => {
   const context = useContext(OrderContext);
   if (!context) {
-    throw new Error('useOrder must be used within an OrderProvider');
+    throw new Error("useOrder must be used within an OrderProvider");
   }
   return context;
 };
@@ -33,35 +34,40 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
   const [isSSEConnected, setIsSSEConnected] = useState(false);
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
 
-
   function navigateWithoutHook(path: string) {
     window.history.pushState({}, "", path);
     window.dispatchEvent(new PopStateEvent("popstate"));
   }
-  
-  // Função para iniciar conexão SSE
-  const startSSEConnection = (orderId: string) => {
-    // Fechar conexão anterior se existir
+
+  // Apenas define o ID do pedido
+  const setOrderId = (orderId: string) => {
+    setCurrentOrderId(orderId);
+  };
+
+  // Observa mudanças em currentOrderId e abre a SSE
+  useEffect(() => {
+    if (!currentOrderId) return;
+
+    // Fecha conexão anterior
     if (eventSource) {
       eventSource.close();
     }
 
-    const newEventSource = orderService.createSSEConnection(orderId);
+    const newEventSource = orderService.createSSEConnection(currentOrderId);
 
     newEventSource.onopen = () => {
       setIsSSEConnected(true);
-      console.log('SSE conectado para pedido:', orderId);
+      console.log("SSE conectado para pedido:", currentOrderId);
     };
 
-    // Listener para mudanças de status do pedido
-    newEventSource.addEventListener('orderStatusChanged', (event: MessageEvent) => {
+    newEventSource.addEventListener("orderStatusChanged", (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
-        if (typeof data.OrderStatus === 'number') {
-            setCurrentOrderStatus(data.OrderStatus);
+        if (typeof data.OrderStatus === "number") {
+          setCurrentOrderStatus(data.OrderStatus);
         }
-        if (typeof data.PaymentStatus === 'number') {
-            setPaymentStatus(data.PaymentStatus);
+        if (typeof data.PaymentStatus === "number") {
+          setPaymentStatus(data.PaymentStatus);
         }
 
         if (data.PaymentStatus === PAYMENT_STATUS.declined) {
@@ -71,27 +77,24 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
         if (data.PaymentStatus === PAYMENT_STATUS.refunded) {
           navigateWithoutHook("/pagamento-estornado");
         }
-
       } catch (error) {
-        console.error('Erro ao processar evento orderStatusChanged:', error);
+        console.error("Erro ao processar evento orderStatusChanged:", error);
       }
     });
 
     newEventSource.onerror = (event) => {
       setIsSSEConnected(false);
-      console.error('Erro na conexão SSE:', event);
+      console.error("Erro na conexão SSE:", event);
     };
 
     setEventSource(newEventSource);
-  };
 
-  // Função para definir o ID do pedido e iniciar SSE
-  const setOrderId = (orderId: string) => {
-    setCurrentOrderId(orderId);
-    startSSEConnection(orderId);
-  };
+    return () => {
+      newEventSource.close();
+    };
+  }, [currentOrderId]);
 
-  // Função para limpar dados do pedido
+  // Limpa dados do pedido
   const clearOrder = () => {
     if (eventSource) {
       eventSource.close();
@@ -103,7 +106,7 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
     setEventSource(null);
   };
 
-  // Cleanup quando o componente for desmontado
+  // Fecha SSE ao desmontar provider
   useEffect(() => {
     return () => {
       if (eventSource) {
@@ -121,9 +124,5 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
     clearOrder,
   };
 
-  return (
-    <OrderContext.Provider value={value}>
-      {children}
-    </OrderContext.Provider>
-  );
+  return <OrderContext.Provider value={value}>{children}</OrderContext.Provider>;
 };
