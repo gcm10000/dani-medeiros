@@ -84,7 +84,7 @@ export const AddToCartModal: React.FC<AddToCartModalProps> = ({
           <div className="flex gap-4">
             <div className="flex-shrink-0">
               <img 
-                src={product.images[0].url} 
+                src={product.images?.[0].url || ''} 
                 alt={product.name}
                 className="w-20 h-20 rounded-lg object-cover shadow-soft"
               />

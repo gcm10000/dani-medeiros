@@ -16,10 +16,12 @@ import StockItemSelect from '@/components/admin/StockItemSelect';
 import { getCostTypeMap } from '@/utils/stockMovements';
 
 interface RecipeDetailsProps {
-  params: { recipeId: string };
+  params: Promise<{
+    recipeId: string;
+  }>;
 }
 
-const RecipeDetails = ({ params }: RecipeDetailsProps) => {
+const RecipeDetails = ({ params }: RecipeDetailsProps) => {  
   const { recipeId } = React.use(params as unknown as React.Usable<{ recipeId: string }>);
   
   const router = useRouter();

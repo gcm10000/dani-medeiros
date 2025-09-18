@@ -108,8 +108,8 @@ const Coupons = () => {
   const handleEdit = async (coupon: Coupon) => {
     setEditingId(coupon.id);
     setFormData({
-      code: coupon.code,
-  type: coupon.type && coupon.type.toLowerCase() === 'percent' ? 'percent' : 'fixed',
+      code: coupon.code || '',
+      type: coupon.type && coupon.type.toLowerCase() === 'percent' ? 'percent' : 'fixed',
       value: coupon.value,
       expiresAt: coupon.expiresAt.split('T')[0],
       isActive: coupon.isActive

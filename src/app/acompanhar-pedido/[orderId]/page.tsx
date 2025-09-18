@@ -43,9 +43,9 @@ interface LocalOrderData {
 }
 
 interface OrderTrackingProps {
-  params: {
+  params: Promise<{
     orderId: string;
-  } | Promise<{ orderId: string }>; // pode ser promise ou objeto direto
+  }>;
 }
 
 const OrderTracking = ({ params }: OrderTrackingProps) => {

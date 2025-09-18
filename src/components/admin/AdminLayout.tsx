@@ -1,12 +1,15 @@
-import { Outlet, NavLink } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { 
-  ShoppingBag, 
-  Package, 
-  ShoppingCart, 
-  ChefHat, 
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  ShoppingBag,
+  Package,
+  ShoppingCart,
+  ChefHat,
   Archive,
   Ticket,
   Home,
@@ -16,12 +19,12 @@ import {
   Menu,
   ExternalLink,
   ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
-import { useState } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useAdminSse } from '@/contexts/AdminSseContext';
-import ConnectionStatusIndicator from './ConnectionStatusIndicator';
+  ChevronRight,
+} from "lucide-react";
+import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useAdminSse } from "@/contexts/AdminSseContext";
+import ConnectionStatusIndicator from "./ConnectionStatusIndicator";
 
 type Notification = {
   id: number;
@@ -31,22 +34,23 @@ type Notification = {
   read: boolean;
 };
 
-const AdminLayout = () => {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
-    const { messages, status } = useAdminSse();
+  const { messages, status } = useAdminSse();
+  const pathname = usePathname();
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  
+
   const navItems = [
-    { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
-    { to: '/admin/categorias', label: 'Categorias', icon: Archive },
-    { to: '/admin/produtos', label: 'Cardápio', icon: Cake },
-    { to: '/admin/pedidos', label: 'Pedidos', icon: ShoppingCart },
-    { to: '/admin/vendas', label: 'Vendas Presenciais', icon: Package },
-    { to: '/admin/cupons', label: 'Cupons', icon: Ticket },
-    { to: '/admin/receitas', label: 'Receitas', icon: ChefHat },
-    { to: '/admin/insumos', label: 'Insumos', icon: ShoppingBag },
+    { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/admin/categorias", label: "Categorias", icon: Archive },
+    { to: "/admin/produtos", label: "Cardápio", icon: Cake },
+    { to: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart },
+    { to: "/admin/vendas", label: "Vendas Presenciais", icon: Package },
+    { to: "/admin/cupons", label: "Cupons", icon: Ticket },
+    { to: "/admin/receitas", label: "Receitas", icon: ChefHat },
+    { to: "/admin/insumos", label: "Insumos", icon: ShoppingBag },
   ];
 
   const [notifications, setNotifications] = useState<Notification[]>(
@@ -59,23 +63,18 @@ const AdminLayout = () => {
     }))
   );
 
-  const unreadNotifications = notifications.filter(n => !n.read);
-  const readNotifications = notifications.filter(n => n.read);
+  const unreadNotifications = notifications.filter((n) => !n.read);
+  const readNotifications = notifications.filter((n) => n.read);
 
   const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
   const renderNotification = (note: Notification, isRead: boolean) => (
-    <div
-      key={note.id}
-      className="text-sm border-b pb-1 px-2 flex flex-col"
-    >
+    <div key={note.id} className="text-sm border-b pb-1 px-2 flex flex-col">
       <div className="flex items-center space-x-2">
-        {!isRead && (
-          <span className="h-2 w-2 rounded-full bg-red-500 flex-shrink-0"></span>
-        )}
-        <div className={`truncate ${!isRead ? 'font-medium' : 'text-muted-foreground'}`}>
+        {!isRead && <span className="h-2 w-2 rounded-full bg-red-500 flex-shrink-0"></span>}
+        <div className={`truncate ${!isRead ? "font-medium" : "text-muted-foreground"}`}>
           {note.title}
         </div>
       </div>
@@ -101,23 +100,23 @@ const AdminLayout = () => {
           </>
         )}
       </a>
-      
-      {navItems.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          end={item.end}
-          onClick={() => isMobile && setIsSheetOpen(false)}
-          className={({ isActive }) =>
-            `flex items-center px-3 py-2 rounded-md hover:bg-muted transition-smooth ${
-              isActive ? 'bg-muted text-primary font-semibold' : ''
-            } ${isCollapsed && !isMobile ? 'justify-center' : 'space-x-2'}`
-          }
-        >
-          <item.icon className="h-5 w-5" />
-          {(!isCollapsed || isMobile) && <span>{item.label}</span>}
-        </NavLink>
-      ))}
+
+      {navItems.map((item) => {
+        const isActive = pathname === item.to;
+        return (
+          <Link
+            key={item.to}
+            href={item.to}
+            onClick={() => isMobile && setIsSheetOpen(false)}
+            className={`flex items-center px-3 py-2 rounded-md hover:bg-muted transition-smooth ${
+              isActive ? "bg-muted text-primary font-semibold" : ""
+            } ${isCollapsed && !isMobile ? "justify-center" : "space-x-2"}`}
+          >
+            <item.icon className="h-5 w-5" />
+            {(!isCollapsed || isMobile) && <span>{item.label}</span>}
+          </Link>
+        );
+      })}
     </nav>
   );
 
@@ -139,12 +138,7 @@ const AdminLayout = () => {
         <div className="flex justify-between items-center mb-2">
           <div className="font-semibold text-sm">Notificações</div>
           {unreadNotifications.length > 0 && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-xs px-2 h-6"
-              onClick={markAllAsRead}
-            >
+            <Button size="sm" variant="outline" className="text-xs px-2 h-6" onClick={markAllAsRead}>
               Marcar todas
             </Button>
           )}
@@ -177,20 +171,24 @@ const AdminLayout = () => {
     <div className="min-h-screen flex bg-background">
       {/* Desktop Sidebar */}
       {!isMobile && (
-        <aside className={`${isCollapsed ? 'w-16' : 'w-64'} border-r bg-card flex flex-col transition-all duration-300`}>
+        <aside
+          className={`${
+            isCollapsed ? "w-16" : "w-64"
+          } border-r bg-card flex flex-col transition-all duration-300`}
+        >
           {/* Logo */}
           <div className="h-16 flex items-center justify-center border-b px-4">
             {isCollapsed ? (
-              <img 
-                src="/assets/logo.png" 
-                alt="Dani Medeiros - Bolos e Doces" 
+              <img
+                src="/assets/logo.png"
+                alt="Dani Medeiros - Bolos e Doces"
                 className="h-10 w-10 rounded-full"
               />
             ) : (
               <div className="flex items-center space-x-2">
-                <img 
-                  src="/assets/logo.png" 
-                  alt="Dani Medeiros - Bolos e Doces" 
+                <img
+                  src="/assets/logo.png"
+                  alt="Dani Medeiros - Bolos e Doces"
                   className="h-10 w-10 rounded-full"
                 />
                 <div>
@@ -209,11 +207,7 @@ const AdminLayout = () => {
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="w-full"
             >
-              {isCollapsed ? (
-                <ChevronRight className="h-4 w-4" />
-              ) : (
-                <ChevronLeft className="h-4 w-4" />
-              )}
+              {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
             </Button>
           </div>
 
@@ -243,11 +237,7 @@ const AdminLayout = () => {
       {isMobile && (
         <div className="fixed top-0 left-0 right-0 z-50 h-16 bg-card border-b flex items-center justify-between px-4">
           <div className="flex items-center space-x-2">
-            <img 
-              src="/assets/logo.png" 
-              alt="Dani Medeiros - Bolos e Doces" 
-              className="h-8 w-8 rounded-full"
-            />
+            <img src="/assets/logo.png" alt="Dani Medeiros - Bolos e Doces" className="h-8 w-8 rounded-full" />
             <div>
               <h1 className="text-sm font-bold text-primary font-dancing">Dani Medeiros</h1>
               <p className="text-xs text-muted-foreground">Bolos e Doces</p>
@@ -276,11 +266,7 @@ const AdminLayout = () => {
       )}
 
       {/* Main Content */}
-      <main className={`flex-1 ${isMobile ? 'pt-16' : ''} p-6`}>
-        <Outlet />
-      </main>
+      <main className={`flex-1 ${isMobile ? "pt-16" : ""} p-6`}>{children}</main>
     </div>
   );
-};
-
-export default AdminLayout;
+}

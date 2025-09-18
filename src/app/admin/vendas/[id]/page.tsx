@@ -1,7 +1,9 @@
 import ProductSaleForm from "@/components/admin/ProductSaleForm";
 
 interface EditarVendaPageProps {
-  params: { id: string };
+  params: Promise<{
+    id: string;
+  }>;
 }
 
 export default async function EditarVendaPage({ params }: EditarVendaPageProps) {
