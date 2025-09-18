@@ -182,14 +182,14 @@ const AdminLayout = () => {
           <div className="h-16 flex items-center justify-center border-b px-4">
             {isCollapsed ? (
               <img 
-                src="/lovable-uploads/81a4b5fc-2edf-4df5-8652-db8b0309f302.png" 
+                src="/assets/logo.png" 
                 alt="Dani Medeiros - Bolos e Doces" 
                 className="h-10 w-10 rounded-full"
               />
             ) : (
               <div className="flex items-center space-x-2">
                 <img 
-                  src="/lovable-uploads/81a4b5fc-2edf-4df5-8652-db8b0309f302.png" 
+                  src="/assets/logo.png" 
                   alt="Dani Medeiros - Bolos e Doces" 
                   className="h-10 w-10 rounded-full"
                 />
@@ -244,7 +244,7 @@ const AdminLayout = () => {
         <div className="fixed top-0 left-0 right-0 z-50 h-16 bg-card border-b flex items-center justify-between px-4">
           <div className="flex items-center space-x-2">
             <img 
-              src="/lovable-uploads/81a4b5fc-2edf-4df5-8652-db8b0309f302.png" 
+              src="/assets/logo.png" 
               alt="Dani Medeiros - Bolos e Doces" 
               className="h-8 w-8 rounded-full"
             />

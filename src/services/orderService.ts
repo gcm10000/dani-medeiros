@@ -118,7 +118,7 @@ export const orderService = {
   },
 
   // Cancelar pedido
-  async cancelOrder(orderId: string): Promise<boolean> {
+  async cancelOrder(orderId: string | number): Promise<boolean> {
     try {
       const response = await fetch(`${BASE_URL}/api/Orders/cancel_order`, {
         method: 'POST',
@@ -181,7 +181,7 @@ export const orderService = {
   },
 
   // Admin: Aprovar pagamento
-  async approvePayment(orderId: string): Promise<boolean> {
+  async approvePayment(orderId: number): Promise<boolean> {
     try {
       const response = await fetch(`${BASE_URL}/api/Orders/${orderId}/approve-payment`, {
         method: 'POST'
@@ -194,7 +194,7 @@ export const orderService = {
   },
 
   // Admin: Recusar pagamento
-  async declinePayment(orderId: string): Promise<boolean> {
+  async declinePayment(orderId: number): Promise<boolean> {
     try {
       const response = await fetch(`${BASE_URL}/api/Orders/${orderId}/decline-payment`, {
         method: 'POST'
@@ -207,7 +207,7 @@ export const orderService = {
   },
 
   // Admin: Marcar pedido como pronto
-  async markReady(orderId: string): Promise<void> {
+  async markReady(orderId: number): Promise<void> {
     try {
       await fetch(`${BASE_URL}/api/Orders/${orderId}/ready`, {
         method: 'POST'
@@ -219,7 +219,7 @@ export const orderService = {
   },
 
   // Admin: Marcar pedido como pronto
-  async markAsConfirmed(orderId: string): Promise<void> {
+  async markAsConfirmed(orderId: number): Promise<void> {
     try {
       await fetch(`${BASE_URL}/api/Orders/${orderId}/confirmed`, {
         method: 'POST'
@@ -231,7 +231,7 @@ export const orderService = {
   },
 
   // Admin: Marcar pedido a caminho
-  async markOnTheWay(orderId: string): Promise<void> {
+  async markOnTheWay(orderId: number): Promise<void> {
     try {
       await fetch(`${BASE_URL}/api/Orders/${orderId}/on-the-way`, {
         method: 'POST'
@@ -243,7 +243,7 @@ export const orderService = {
   },
 
   // Admin: Marcar pedido como entregue
-  async markDelivered(orderId: string): Promise<void> {
+  async markDelivered(orderId: number): Promise<void> {
     try {
       await fetch(`${BASE_URL}/api/Orders/${orderId}/delivered`, {
         method: 'POST'

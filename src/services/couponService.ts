@@ -3,7 +3,7 @@ import { PagedResult } from '@/utils/pagedResult';
 
 export interface Coupon {
   id: number;
-  code: string;
+  code: string | null;
   type: 'fixed' | 'percent';
   value: number;
   isActive: boolean;

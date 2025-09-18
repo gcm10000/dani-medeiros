@@ -1,7 +1,9 @@
-// contexts/AdminSseContext.tsx
-import { orderService } from "@/services/orderService";
+"use client";
+
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { orderService } from "@/services/orderService";
+import { usePathname } from "next/navigation";
+import { Howl } from "howler";
 
 export type ConnectionStatus = "disconnected" | "connecting" | "connected" | "error";
 
@@ -11,35 +13,87 @@ type AdminSseContextType = {
   newOrders: any[];
   soundEnabled: boolean;
   enableSound: () => void;
+  acceptOrder: (orderId: number) => void;
+  cancelOrder: (orderId: number) => void;
 };
 
 const AdminSseContext = createContext<AdminSseContextType | undefined>(undefined);
 
 export const AdminSseProvider = ({ children }: { children: React.ReactNode }) => {
-  const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith("/admin");
+  const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith("/admin");
 
   const [messages, setMessages] = useState<string[]>([]);
   const [status, setStatus] = useState<ConnectionStatus>("disconnected");
   const [newOrders, setNewOrders] = useState<any[]>([]);
   const [soundEnabled, setSoundEnabled] = useState(false);
   const soundEnabledRef = useRef(false);
+
   useEffect(() => {
     soundEnabledRef.current = soundEnabled;
   }, [soundEnabled]);
 
+  // --- Howler setup ---
+  const newOrderSoundRef = useRef<Howl | null>(null);
+  const paidOrderSoundRef = useRef<Howl | null>(null);
+  const audioUnlockedRef = useRef(false);
+
+  const pendingPaidOrdersRef = useRef<Set<number>>(new Set());
+
+  useEffect(() => {
+    // inicializa sons
+    newOrderSoundRef.current = new Howl({ src: ["/audios/new-order.mp3"], volume: 1 });
+    paidOrderSoundRef.current = new Howl({ src: ["/audios/paid-order.mp3"], loop: true, volume: 1 });
+
+    // função para desbloquear áudio na primeira interação
+    const unlockAudio = () => {
+      if (!audioUnlockedRef.current) {
+        // toca silenciosamente para desbloquear (apenas 1x, sem loop)
+        newOrderSoundRef.current?.volume(0);
+        newOrderSoundRef.current?.play();
+        newOrderSoundRef.current?.once("end", () => newOrderSoundRef.current?.volume(1));
+
+        // desbloqueia também o som de pago, mas SEM loop
+        const tmpPaid = new Howl({ src: ["/audios/paid-order.mp3"], volume: 0 });
+        tmpPaid.play();
+        tmpPaid.once("end", () => tmpPaid.unload()); // descarrega para liberar memória
+
+        audioUnlockedRef.current = true;
+        setSoundEnabled(true);
+        soundEnabledRef.current = true;
+        console.log("Áudio desbloqueado pelo usuário");
+      }
+    };
+
+    window.addEventListener("click", unlockAudio, { once: true });
+    window.addEventListener("touchend", unlockAudio, { once: true });
+
+    return () => {
+      window.removeEventListener("click", unlockAudio);
+      window.removeEventListener("touchend", unlockAudio);
+    };
+  }, []);
+
   const enableSound = () => {
-    const audio = new Audio("/audios/new-order.mp3");
-    audio.volume = 1;
-    audio.play().then(() => {
-      setSoundEnabled(true);
-      soundEnabledRef.current = true;
-      console.log("Som habilitado pelo usuário");
-    }).catch(err => {
-      console.warn("Não foi possível habilitar som:", err);
-    });
+    if (!newOrderSoundRef.current || !paidOrderSoundRef.current) return;
+    audioUnlockedRef.current = true;
+    setSoundEnabled(true);
+    soundEnabledRef.current = true;
+    console.log("Som habilitado manualmente");
   };
 
+  // --- Funções para tocar/pausar som de pedido pago ---
+  const playPaidOrderSound = () => {
+    if (paidOrderSoundRef.current && pendingPaidOrdersRef.current.size > 0 && !paidOrderSoundRef.current.playing()) {
+      paidOrderSoundRef.current.play();
+    }
+  };
+
+  const stopPaidOrderSound = () => {
+    paidOrderSoundRef.current?.stop();
+  };
+
+  // --- SSE setup ---
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const keepAliveIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -72,41 +126,38 @@ export const AdminSseProvider = ({ children }: { children: React.ReactNode }) =>
     eventSourceRef.current = es;
 
     es.addEventListener("connected", (event) => {
-      console.log("Evento de conexão recebido:", event.data);
+      console.log("Conectado SSE:", event.data);
       setStatus("connected");
-      startKeepAlive(); // inicia o keep-alive quando conectar
+      startKeepAlive();
     });
 
     es.addEventListener("orderCreated", (event) => {
-      console.log("Novo pedido recebido:", event.data);
-      setMessages((prev) => [...prev, event.data]);
+      console.log("Novo pedido:", event.data);
+      setMessages(prev => [...prev, event.data]);
 
-      if (soundEnabledRef.current) {
-        try {
-          const audio = new Audio("/audios/new-order.mp3");
-          audio.volume = 1;
-          audio.play();
-        } catch {}
+      if (audioUnlockedRef.current && newOrderSoundRef.current) {
+        newOrderSoundRef.current.play();
       }
 
       try {
         const order = JSON.parse(event.data);
-        const normalizeKey = (key: string) => key.charAt(0).toLowerCase() + key.slice(1);
-        const normalizeObj = (obj: any): any => {
-          if (Array.isArray(obj)) return obj.map(normalizeObj);
-          if (obj && typeof obj === "object") {
-            const out: any = {};
-            for (const k in obj) {
-              out[normalizeKey(k)] = normalizeObj(obj[k]);
-            }
-            return out;
-          }
-          return obj;
-        };
-        const normalizedOrder = normalizeObj(order);
-        setNewOrders((prev) => [...prev, normalizedOrder]);
+        setNewOrders(prev => [...prev, order]);
       } catch {
-        setNewOrders((prev) => [...prev, event.data]);
+        setNewOrders(prev => [...prev, event.data]);
+      }
+    });
+
+    // --- listener para status do pedido ---
+    es.addEventListener("orderStatusChangedAdmin", (event) => {
+      try {
+        const order = JSON.parse(event.data);
+        // adiciona à fila de alertas se for pago e novo
+        if (order.OrderStatusId === 0 && order.PaymentStatusId === 1) {
+          pendingPaidOrdersRef.current.add(order.Id);
+          playPaidOrderSound();
+        }
+      } catch (e) {
+        console.error("Erro parse orderStatusChangedAdmin:", e);
       }
     });
 
@@ -116,7 +167,7 @@ export const AdminSseProvider = ({ children }: { children: React.ReactNode }) =>
 
       es.close();
       eventSourceRef.current = null;
-      stopKeepAlive(); // para o keep-alive se cair
+      stopKeepAlive();
 
       if (isAdminRoute && !reconnectTimeoutRef.current) {
         reconnectTimeoutRef.current = setTimeout(() => {
@@ -136,25 +187,40 @@ export const AdminSseProvider = ({ children }: { children: React.ReactNode }) =>
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
-    stopKeepAlive(); // para sempre que desconectar
+    stopKeepAlive();
     setStatus("disconnected");
     console.log("SSE desconectado");
   };
 
   useEffect(() => {
-    if (isAdminRoute) {
-      connect();
-    } else {
-      disconnect();
-    }
-
-    return () => {
-      disconnect();
-    };
+    if (isAdminRoute) connect();
+    else disconnect();
+    return () => disconnect();
   }, [isAdminRoute]);
 
+  // --- Funções públicas para aceitar/cancelar pedidos pagos ---
+  const acceptOrder = (orderId: number) => {
+    pendingPaidOrdersRef.current.delete(orderId);
+    if (pendingPaidOrdersRef.current.size === 0) stopPaidOrderSound();
+    orderService.markAsConfirmed(orderId);
+  };
+
+  const cancelOrder = (orderId: number) => {
+    pendingPaidOrdersRef.current.delete(orderId);
+    if (pendingPaidOrdersRef.current.size === 0) stopPaidOrderSound();
+    orderService.cancelOrder(orderId);
+  };
+
   return (
-    <AdminSseContext.Provider value={{ messages, status, newOrders, soundEnabled, enableSound }}>
+    <AdminSseContext.Provider value={{ 
+      messages, 
+      status, 
+      newOrders, 
+      soundEnabled, 
+      enableSound,
+      acceptOrder,
+      cancelOrder
+    }}>
       {children}
     </AdminSseContext.Provider>
   );

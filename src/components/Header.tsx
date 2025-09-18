@@ -33,7 +33,7 @@ const Header = () => {
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
           <img 
-            src="/lovable-uploads/81a4b5fc-2edf-4df5-8652-db8b0309f302.png" 
+            src="/assets/logo.png" 
             alt="Dani Medeiros - Bolos e Doces" 
             className="h-12 w-12 rounded-full"
           />

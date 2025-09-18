@@ -1,9 +1,13 @@
 // src/app/layout.tsx
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import "./globals.css";
 import { LayoutWrapper } from "@/components/LayoutWrapper";
 import { CartProvider } from "@/contexts/CartContext";
 import { OrderProvider } from "@/contexts/OrderContext";
+import { AdminSseProvider } from "@/contexts/AdminSseContext";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -20,7 +24,13 @@ export default function RootLayout({
       <body className="antialiased">
         <CartProvider>
           <OrderProvider>
-            <LayoutWrapper>{children}</LayoutWrapper>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <AdminSseProvider>
+                <LayoutWrapper>{children}</LayoutWrapper>
+              </AdminSseProvider>
+            </TooltipProvider>
           </OrderProvider>
         </CartProvider>
       </body>

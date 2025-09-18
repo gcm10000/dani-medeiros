@@ -14,7 +14,7 @@ export interface ProductSale {
   products: ProductSaleProduct[];
   totalPrice: number;
   discount: number;
-  couponCode?: string;
+  couponCode?: string | null;
   date: string;
 }
 

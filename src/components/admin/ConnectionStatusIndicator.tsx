@@ -1,3 +1,5 @@
+"use client";
+
 import { useAdminSse } from "@/contexts/AdminSseContext";
 
 const ConnectionStatusIndicator = () => {
