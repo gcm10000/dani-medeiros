@@ -138,7 +138,7 @@ export const AdminSseProvider = ({ children }: { children: React.ReactNode }) =>
       if (audioUnlockedRef.current && newOrderSoundRef.current) {
         newOrderSoundRef.current.play();
       }
-
+      
       try {
         const order = JSON.parse(event.data);
         setNewOrders(prev => [...prev, order]);
@@ -150,10 +150,11 @@ export const AdminSseProvider = ({ children }: { children: React.ReactNode }) =>
     // --- listener para status do pedido ---
     es.addEventListener("orderStatusChangedAdmin", (event) => {
       try {
+        debugger;
         const order = JSON.parse(event.data);
         // adiciona à fila de alertas se for pago e novo
-        if (order.OrderStatusId === 0 && order.PaymentStatusId === 1) {
-          pendingPaidOrdersRef.current.add(order.Id);
+        if (order.orderStatusId === 0 && order.paymentStatusId === 1) {
+          pendingPaidOrdersRef.current.add(order.id);
           playPaidOrderSound();
         }
       } catch (e) {

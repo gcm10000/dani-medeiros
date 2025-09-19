@@ -36,8 +36,10 @@ const Order: React.FC = () => {
 
     // Adiciona novos pedidos recebidos via SSE
   useEffect(() => {
+    console.log('>>>>>>>>>>>>>>>>>>> newOrders', newOrders);
     if (Array.isArray(newOrders) && newOrders.length > 0) {
       setOrders((prev) => {
+        debugger;
         // Evita duplicidade por id
         const ids = new Set(prev.map(o => o.id));
         const onlyNew = newOrders.filter((o: any) => o && o.id && !ids.has(o.id));
@@ -45,8 +47,13 @@ const Order: React.FC = () => {
         console.log('result', result);
         return result;
       });
+      
     }
   }, [newOrders]);
+
+  useEffect(() => {
+    console.log('orders', orders);
+  }, [orders]);
 
   const loadOrders = async () => {
     setLoadingList(true);
