@@ -62,6 +62,7 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
 
     newEventSource.addEventListener("orderStatusChanged", (event: MessageEvent) => {
       try {
+        debugger;
         const data = JSON.parse(event.data);
         if (typeof data.OrderStatus === "number") {
           setCurrentOrderStatus(data.OrderStatus);

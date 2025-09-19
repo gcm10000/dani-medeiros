@@ -135,6 +135,7 @@ export const orderService = {
 
   // Conectar ao SSE para updates em tempo real
   createSSEConnection(orderId: string): EventSource {
+    debugger;
     return new EventSource(`${BASE_URL}/api/Orders/stream/${orderId}`);
   },
 

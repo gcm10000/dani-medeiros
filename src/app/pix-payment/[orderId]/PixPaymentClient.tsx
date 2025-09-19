@@ -15,6 +15,7 @@ import { paymentStatusMap } from "@/config/paymentStatusMap";
 import { paymentService } from "@/services/paymentService";
 import { generateIdempotencyKey } from "@/utils/idempotencyKey";
 import { AdminOrder } from "@/services/orderService";
+import { useRouter } from "next/navigation";
 
 type PixPaymentClientProps = {
   orderId: number;
@@ -23,16 +24,16 @@ type PixPaymentClientProps = {
 
 const PixPaymentClient: React.FC<PixPaymentClientProps> = ({ orderId, orderData }) => {
   const { paymentStatus, setOrderId } = useOrder();
+  const router = useRouter();
   const [copiedCode, setCopiedCode] = useState(false);
 
   // useEffect(() => {
   //   setOrderId(orderId.toString());
   // }, [orderId, setOrderId]);
 
-  // useEffect(() => {
-  //   const data = getPixDataResponse(orderId.toString());
-  //   setPixData(data);
-  // }, [orderId]);
+  useEffect(() => {
+    setOrderId(orderId.toString());
+  }, [orderId]);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("pt-BR", {
@@ -59,17 +60,19 @@ const PixPaymentClient: React.FC<PixPaymentClientProps> = ({ orderId, orderData 
   };
 
   // redirecionamento depende só de `paymentStatus`
-  if (paymentStatus === paymentStatusMap.Approved) {
-    toast({
-      title: "Pagamento aprovado!",
-      description: "Redirecionando para acompanhamento do pedido...",
-    });
-    window.location.href = `/acompanhar-pedido/${orderId}`;
-  } else if (paymentStatus === paymentStatusMap.Declined) {
-    window.location.href = "/pagamento-recusado";
-  } else if (paymentStatus === paymentStatusMap.Refunded) {
-    window.location.href = "/pagamento-estornado";
-  }
+  useEffect(() => {
+    if (paymentStatus === paymentStatusMap.Approved) {
+      toast({
+        title: "Pagamento aprovado!",
+        description: "Redirecionando para acompanhamento do pedido...",
+      });
+      router.push(`/acompanhar-pedido/${orderId}`);
+    } else if (paymentStatus === paymentStatusMap.Declined) {
+      router.push('/pagamento-recusado');
+    } else if (paymentStatus === paymentStatusMap.Refunded) {
+      router.push('/pagamento-estornado');
+    }
+  }, [paymentStatus, router, orderId]);
 
   const handleRetryPixPayment = async () => {
     const idempotencyKey = generateIdempotencyKey();
